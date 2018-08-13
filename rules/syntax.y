@@ -26,81 +26,115 @@ yyFlexLexer* lexer;
 %}
 
 %union {
-
-  struct {bool is_terminal_;std::string value_;} terminal_symbol_;
-  struct {bool is_terminal_;Data* value_;} non_terminal_symbol_;
-
-  YYSTYPE(){terminal_symbol_.is_terminal_ = false;} 
-  ~YYSTYPE(){/*non_terminal_symbol_は外でdeleteする。TODO:unique_ptrを検討する*/}
-  YYSTYPE& operator=(const YYSTYPE& rhs){
-    terminal_symbol_.is_terminal_ = rhs.terminal_symbol_.is_terminal_;
-    if (terminal_symbol_.is_terminal_){
-      terminal_symbol_.value_ = rhs.terminal_symbol_.value_;
-    } else {
-      non_terminal_symbol_.value_ = rhs.non_terminal_symbol_.value_;
-    }
-    return *this;
-  }
+  char m_string[128];
+  int m_int;
+  bool m_bool;
 }
 
-%token EBGUIDE
-%token D_QUATATION
-%token ID
 %token SYMBOL
-%token REFERENCE_ID
-%token ARRAY_HEADER
-%token START_INSTANCE
-%token END_INSTANCE
 %token SEMICOLON
 %token TEXT
-%token VERSION
-%token NUMBER
+%token INTEGER
 %token BOOL
 %token BRACKET_S
 %token BRACKET_E
 %token COLON
+%token BRACE_S
+%token BRACE_E
+%token DEF
+%token COMMA
+%token PLUS
+%token MINUS
+%token ASTER
+%token SLASH
+%token EQUAL
+%token VAR_INIT_DEF
+%token PROJECTION_ARROW
+%token PARENTHESE_S
+%token PARENTHESE_E
+%token RETURN
+%token INT
+%token VOID
 
-%type  <terminal_symbol_> EBGUIDE D_QUATATION ID SYMBOL REFERENCE_ID
-%type  <terminal_symbol_> ARRAY_HEADER START_INSTANCE END_INSTANCE SEMICOLON TEXT VERSION NUMBER BOOL BRACKET_S BRACKET_E COLON
+%type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT VOID
+%type <m_int> INTEGER 
+%type <m_bool> BOOL 
 
-%type  <non_terminal_symbol_> property
-%type  <terminal_symbol_> indirect_ref 
+%type <m_int> expression add_expression multi_expression base_expression 
 
 %%
 
-input       : EBGUIDE VERSION SEMICOLON file_root {}
-            ;
-file_root   : REFERENCE_ID instance {}
-            ;
-instance    : START_INSTANCE properties END_INSTANCE {} 
-            ;
-properties  : 
-            | property properties {}
-            ;
-property    : ID SYMBOL SYMBOL TEXT SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID SYMBOL SYMBOL indirect_ref SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID SYMBOL SYMBOL NUMBER SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID SYMBOL SYMBOL BOOL SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID SYMBOL SYMBOL indirect_ref instance {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID SYMBOL SYMBOL instance_array SEMICOLON {}
-            | ID TEXT SYMBOL TEXT SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID TEXT SYMBOL indirect_ref SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID TEXT SYMBOL NUMBER SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID TEXT SYMBOL BOOL SEMICOLON {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID TEXT SYMBOL indirect_ref instance {$$ = {false, new SimpleProperty($1.value_, $2.value_, $3.value_, $4.value_)};}
-            | ID TEXT SYMBOL instance_array SEMICOLON {}
-            ;
-indirect_ref: REFERENCE_ID {}
-            | REFERENCE_ID ID {}
-            ;
-instance_array  : ARRAY_HEADER BRACKET_S groups BRACKET_E{} 
+root       :
+           | external_decl root
+           ;
+
+external_decl : function_decl 
+              ;
+
+function_decl : projection_info function_body 
+              ;
+
+projection_info : DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type 
                 ;
-group       : SYMBOL REFERENCE_ID START_INSTANCE properties END_INSTANCE {/*TODO*/}
-            ;
-groups      : 
-            | group 
-            | group COLON groups {/*TODO*/}
-            ;
+
+function_body : BRACE_S sentences BRACE_E
+              ;
+
+//--------------------------------------------------------
+// primary type
+
+primary_type : INT
+             | VOID
+             ;
+
+//--------------------------------------------------------
+// sentence
+
+sentences :
+          | sentence sentences 
+          ;
+
+sentence : var_decl SEMICOLON
+         | RETURN expression SEMICOLON
+         | function_call SEMICOLON
+         ;
+
+var_decls : var_decl 
+          | var_decl COMMA var_decls
+          ;
+
+var_decl  : primary_type SYMBOL
+          | primary_type SYMBOL VAR_INIT_DEF expression
+          ;
+
+function_call : SYMBOL PARENTHESE_S function_args PARENTHESE_E
+              ;
+
+function_args : 
+              | SYMBOL 
+              | SYMBOL COMMA SYMBOL 
+              ;
+
+//--------------------------------------------------------
+// expression
+
+expression : add_expression
+           ;
+
+add_expression : multi_expression PLUS multi_expression {$$ = $1 + $3;}
+               | multi_expression MINUS multi_expression{$$ = $1 - $3;}
+               | multi_expression                       {$$ = $1;}
+               ;
+
+multi_expression : base_expression 
+                 | base_expression ASTER base_expression 
+                 | base_expression SLASH base_expression 
+                 ;
+
+base_expression : INTEGER
+                | SYMBOL                                   {$$ = 0;}
+                | PARENTHESE_S add_expression PARENTHESE_E {$$ = $2;}
+                ;
 
 %%
 
@@ -109,7 +143,6 @@ void yyerror(const char *s){
   std::cout << "Reduction failed in:" << std::endl;
   std::cout << "Line :" << lexer->lineno() << std::endl;
   std::cout << "Token:" << lexer->YYText() << std::endl;
-  std::cout << "Invalid gdata" << std::endl;
 }
 
 int yylex(void){
@@ -118,7 +151,7 @@ int yylex(void){
 
 int main(){
   std::filebuf file;
-  bool ret = file.open("./result/target.gdata", std::ios::in);
+  bool ret = file.open("./result/target.cpp", std::ios::in);
   if (ret == false){
     std::cout << "Open target file failed" << std::endl;
     return 1;

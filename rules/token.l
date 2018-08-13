@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include "syntax.hpp"
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define PRINT(s) printf(s);printf(" ");
@@ -23,16 +23,16 @@
 #define PRINT(s)
 #endif
 
-#define RETURN(TOKEN) PRINT(#TOKEN);return TOKEN
+#define RETURN(TOKEN) memcpy(yylval.m_string,yytext, std::min(yyleng, 128));PRINT(#TOKEN);return TOKEN
+#define RETURN_INT(TOKEN) yylval.m_int=std::stoi(yytext);PRINT(#TOKEN);return TOKEN
 
 %}
 
 %option stack yylineno
  
 %x text_state
-%x version_state
 
-NUMBER_       \-?([1-9][0-9]*)?[0-9]?(\.[0-9]*[Ff]?)?
+INTEGER       \-?[1-9][0-9]*|0
 SPACE         [ \t]*
 NEW_LINE      [\n\r]
 DIGIT         [0-9]
@@ -48,41 +48,49 @@ AGL_BRCKT_E   \>
 ANPHORA       @
 SEMICOLON     ;
 SHARP         #
-SYMBOL        {CHAR}[0-9a-zA-Z_\(\)\,]*
+SYMBOL        {CHAR}[0-9a-zA-Z_]*
+PLUS          \+
+MINUS         \-
+ASTER         \*
+SLASH         \/
+EQUAL         \=
+
 
 
 %%
 
-EBGUIDE                   {yy_push_state(version_state);RETURN(EBGUIDE);}
+int                       {RETURN(INT);}
+void                      {RETURN(VOID);}
+return                    {RETURN(RETURN);}
+def                       {RETURN(DEF);}
 true|false                {RETURN(BOOL);}
-{SHARP}{DIGIT}+           {RETURN(ID);}
-{ANPHORA}[a-zA-Z0-9\-]+   {RETURN(REFERENCE_ID);}
 {SYMBOL}                  {RETURN(SYMBOL);}
-{AGL_BRCKT_S}{SYMBOL}{AGL_BRCKT_E}             {RETURN(ARRAY_HEADER);}
-{NUMBER_}                 {RETURN(NUMBER);}
+{INTEGER}                 {RETURN_INT(INTEGER);}
 
-::
-:/[^:]
 \"                        {yy_push_state(text_state);}
 {SPACE}             
 {NEW_LINE}          
-{BRACE_S}                 {RETURN(START_INSTANCE);}
-{BRACE_E}                 {RETURN(END_INSTANCE);}
+{BRACE_S}                 {RETURN(BRACE_S);}
+{BRACE_E}                 {RETURN(BRACE_E);}
 {SEMICOLON}               {RETURN(SEMICOLON);}
 {BRACKET_S}               {RETURN(BRACKET_S);}
 {BRACKET_E}               {RETURN(BRACKET_E);}
-\,                        {RETURN(COLON);}
+\=\>                      {RETURN(PROJECTION_ARROW);}
+\:\=                      {RETURN(VAR_INIT_DEF);}
+\:                        {RETURN(COLON);}
+\,                        {RETURN(COMMA);}
+{PLUS}                    {RETURN(PLUS);}
+{MINUS}                   {RETURN(MINUS);}
+{ASTER}                   {RETURN(ASTER);}
+{SLASH}                   {RETURN(SLASH);}
+{EQUAL}                   {RETURN(EQUAL);}
+{PARENTHESE_S}            {RETURN(PARENTHESE_S);}
+{PARENTHESE_E}            {RETURN(PARENTHESE_E);}
 
 <text_state>{
 [^\"]+  {yymore();}
 \\\"    {yymore();}
 \"      {yy_pop_state();RETURN(TEXT);}
-}
-
-<version_state>{
-{SPACE}             
-[^;]*         {RETURN(VERSION);}
-{SEMICOLON}   {yy_pop_state();RETURN(SEMICOLON);}
 }
 
 %%

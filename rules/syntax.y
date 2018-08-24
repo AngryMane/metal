@@ -126,12 +126,12 @@ add_expression : multi_expression PLUS multi_expression {$$ = $1 + $3;}
                | multi_expression                       {$$ = $1;}
                ;
 
-multi_expression : base_expression 
-                 | base_expression ASTER base_expression 
-                 | base_expression SLASH base_expression 
+multi_expression : base_expression                       {$$ = $1;}
+                 | base_expression ASTER base_expression {$$ = $1 * $3;}
+                 | base_expression SLASH base_expression {$$ = $1 / $3;}
                  ;
 
-base_expression : INTEGER
+base_expression : INTEGER                                  {$$ = $1;}
                 | SYMBOL                                   {$$ = 0;}
                 | PARENTHESE_S add_expression PARENTHESE_E {$$ = $2;}
                 ;

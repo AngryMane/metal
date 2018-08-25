@@ -23,6 +23,9 @@ public: // initialize/filnalize
   // destructor
   virtual
   ~FuncCallAST(){
+    for (auto cur : m_FuncArgs){
+      delete cur;
+    }
   }
 
 public: // operation

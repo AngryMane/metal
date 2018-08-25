@@ -2,6 +2,7 @@
 #define BASEAST_H
 
 #include "ASTCommon.h"
+#include "ASTMacro.h"
 
 class BaseAST {
 

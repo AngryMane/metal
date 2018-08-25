@@ -1,24 +1,25 @@
-#ifndef VARREFAST_H
-#define VARREFAST_H
+#ifndef RETURNAST_H
+#define RETURNAST_H
 
 #include "external.h"
 #include "ASTCommon.h"
 #include "BaseAST.h"
 
-class VarRefAST : public BaseAST {
+class ReturnAST : public BaseAST {
 
 public: // initialize/filnalize
 
   // constructor
-  VarRefAST(
-    std::string name)
-    : m_Name(name)
-    , BaseAST(AST_TYPE_VAR_REF){
+  ReturnAST(
+    BaseAST* ret)
+    : m_Ret(ret)
+    , BaseAST(AST_TYPE_RETURN){
   }
 
   // destructor
   virtual
-  ~VarRefAST(){
+  ~ReturnAST(){
+    delete m_Ret;
   }
 
 public: // operation
@@ -29,7 +30,7 @@ private: // private methods
 
 private: // private member vars
 
-  MEMBER_WITH_GET(std::string, Name)
+  MEMBER_WITH_GET(BaseAST*, Ret)
 
 };
 

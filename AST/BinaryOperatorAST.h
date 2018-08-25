@@ -38,6 +38,8 @@ public: // initialize/filnalize
   // destructor
   virtual
   ~BinaryOperatorAST(){
+    delete m_LeftOperand;
+    delete m_RightOperand;
   }
 
 public: // operation

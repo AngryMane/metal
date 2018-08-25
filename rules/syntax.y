@@ -5,7 +5,13 @@
 
 %code requires{
 #include "ParserDef.h"
+#include "BaseAST.h"
+#include "IntLiteralAST.h"
+#include "VarDeclAST.h"
+#include "VarRefAST.h"
 #include "BinaryOperatorAST.h"
+#include "FuncCallAST.h"
+#include "ReturnAST.h"
 }
 
 %{
@@ -30,6 +36,8 @@ yyFlexLexer* lexer;
   char m_string[128];
   int m_int;
   bool m_bool;
+  BaseAST* m_BaseAST;
+  std::vector<BaseAST*>* m_BaseASTContainer;
 }
 
 %token SYMBOL
@@ -61,9 +69,19 @@ yyFlexLexer* lexer;
 %type <m_int> INTEGER 
 %type <m_bool> BOOL 
 
-%type <m_int> expression add_expression multi_expression base_expression 
+// expression
+%type <m_BaseAST> expression add_expression multi_expression base_expression function_call 
+
+// statement
+%type <m_BaseAST> statement var_decl return
+
+%type <m_BaseASTContainer> function_args var_decls statements 
+
 
 %%
+
+//--------------------------------------------------------
+// global syntax 
 
 root       :
            | external_decl root
@@ -75,10 +93,11 @@ external_decl : function_decl
 function_decl : projection_info function_body 
               ;
 
-projection_info : DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type 
+projection_info : DEF SYMBOL COLON PROJECTION_ARROW primary_type
+                | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type 
                 ;
 
-function_body : BRACE_S sentences BRACE_E
+function_body : BRACE_S statements BRACE_E
               ;
 
 //--------------------------------------------------------
@@ -89,53 +108,63 @@ primary_type : INT
              ;
 
 //--------------------------------------------------------
-// sentence
+// statement
 
-sentences :
-          | sentence sentences 
+statements :                      {$$ = new std::vector<BaseAST*>;}
+           | statement statements {$$ = $2;$2->push_back($1);}
+           ;
+
+statement : var_decl SEMICOLON   {$$ = $1;}
+          | return SEMICOLON     {$$ = $1;}
+          | expression SEMICOLON {$$ = $1;}
           ;
 
-sentence : var_decl SEMICOLON
-         | RETURN expression SEMICOLON
-         | function_call SEMICOLON
-         ;
-
-var_decls : var_decl 
-          | var_decl COMMA var_decls
+var_decl  : primary_type SYMBOL                         {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
+          | primary_type SYMBOL VAR_INIT_DEF expression {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
           ;
 
-var_decl  : primary_type SYMBOL
-          | primary_type SYMBOL VAR_INIT_DEF expression
-          ;
-
-function_call : SYMBOL PARENTHESE_S function_args PARENTHESE_E
-              ;
-
-function_args : 
-              | SYMBOL 
-              | SYMBOL COMMA SYMBOL 
-              ;
+return  : RETURN expression {$$ = new ReturnAST($2);}
+        ;
 
 //--------------------------------------------------------
 // expression
 
-expression : add_expression
+expression : add_expression {$$ = $1;}
+           | function_call  {$$ = $1;}
            ;
 
-add_expression : multi_expression PLUS multi_expression {$$ = $1 + $3;}
-               | multi_expression MINUS multi_expression{$$ = $1 - $3;}
+add_expression : multi_expression PLUS multi_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
+               | multi_expression MINUS multi_expression{$$ = new BinaryOperatorAST($2, $1, $3);}
                | multi_expression                       {$$ = $1;}
                ;
 
 multi_expression : base_expression                       {$$ = $1;}
-                 | base_expression ASTER base_expression {$$ = $1 * $3;}
-                 | base_expression SLASH base_expression {$$ = $1 / $3;}
+                 | base_expression ASTER base_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
+                 | base_expression SLASH base_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
                  ;
 
-base_expression : INTEGER                                  {$$ = $1;}
-                | SYMBOL                                   {$$ = 0;}
+base_expression : INTEGER                                  {$$ = new IntLiteralAST($1);}
+                | SYMBOL                                   {$$ = new VarRefAST($1);}
                 | PARENTHESE_S add_expression PARENTHESE_E {$$ = $2;}
                 ;
+
+function_call : SYMBOL PARENTHESE_S function_args PARENTHESE_E {$$ = new FuncCallAST($1, *$3);}
+              ;
+
+//--------------------------------------------------------
+// other
+
+var_decls : var_decl                 {$$ = new std::vector<BaseAST*>;$$->push_back($1);}
+          | var_decl COMMA var_decls {$$ = $3;$$->push_back($1);}
+          ;
+
+function_args :                            {$$ = new std::vector<BaseAST*>;}
+              | SYMBOL                     {$$ = new std::vector<BaseAST*>;$$->push_back(new VarRefAST($1));}
+              | SYMBOL COMMA function_args {$$ = $3;$$->push_back(new VarRefAST($1));}
+              ;
+
+//--------------------------------------------------------
+
 
 %%
 

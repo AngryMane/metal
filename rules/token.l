@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include "syntax.hpp"
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define PRINT(s) printf(s);printf(" ");

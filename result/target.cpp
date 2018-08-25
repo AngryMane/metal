@@ -4,7 +4,7 @@ def test_func :
 }
 
 def main :
-  void dummy => int {
+   => int {
   int local_var1 := 0;
   int local_var2 := 0;
   test_func(local_var1, local_var2);

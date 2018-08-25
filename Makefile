@@ -3,6 +3,7 @@ CFLANGS := -g -std=c++11 -oresult/lexer.a -Irules/
 FLEX := flex++
 BISON := bison
 
+AST_DIR = AST
 RULE_DIR = rules
 SRC_DIR := src
 
@@ -27,6 +28,8 @@ bison:
 
 move:
 	cp $(RULE_DIR)/*.h $(SRC_DIR)
+	cp $(AST_DIR)/*.h $(SRC_DIR)
+	cp $(AST_DIR)/*.cpp $(SRC_DIR)
 
 compile:
 	$(CC) $(CFLANGS) $(SRC_DIR)/token.cpp $(SRC_DIR)/syntax.cpp 

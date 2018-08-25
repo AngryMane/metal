@@ -5,6 +5,7 @@
 
 %code requires{
 #include "ParserDef.h"
+#include "BinaryOperatorAST.h"
 }
 
 %{

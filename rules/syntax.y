@@ -4,6 +4,7 @@
  */
 
 %code requires{
+
 #include "ParserDef.h"
 #include "BaseAST.h"
 #include "IntLiteralAST.h"
@@ -12,6 +13,8 @@
 #include "BinaryOperatorAST.h"
 #include "FuncCallAST.h"
 #include "ReturnAST.h"
+#include "FunctionAST.h"
+
 }
 
 %{
@@ -65,7 +68,7 @@ yyFlexLexer* lexer;
 %token INT
 %token VOID
 
-%type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT VOID
+%type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT VOID primary_type 
 %type <m_int> INTEGER 
 %type <m_bool> BOOL 
 
@@ -73,9 +76,9 @@ yyFlexLexer* lexer;
 %type <m_BaseAST> expression add_expression multi_expression base_expression function_call 
 
 // statement
-%type <m_BaseAST> statement var_decl return
+%type <m_BaseAST> statement var_decl return projection_info function_decl 
 
-%type <m_BaseASTContainer> function_args var_decls statements 
+%type <m_BaseASTContainer> function_args var_decls statements function_body 
 
 
 %%
@@ -90,14 +93,14 @@ root       :
 external_decl : function_decl 
               ;
 
-function_decl : projection_info function_body 
+function_decl : projection_info function_body {$$ = $1;dynamic_cast<FunctionAST*>($$)->SetStatements(*$2);}
               ;
 
-projection_info : DEF SYMBOL COLON PROJECTION_ARROW primary_type
-                | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type 
+projection_info : DEF SYMBOL COLON PROJECTION_ARROW primary_type           {$$ = new FunctionAST($2, $5);}
+                | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type {$$ = new FunctionAST($2, $6, *$4);}
                 ;
 
-function_body : BRACE_S statements BRACE_E
+function_body : BRACE_S statements BRACE_E {$$ = $2;}
               ;
 
 //--------------------------------------------------------

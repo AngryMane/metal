@@ -12,6 +12,7 @@ enum AST_TYPE{
   AST_TYPE_FUNCTION, // binary operator
   AST_TYPE_RETURN, // return
   AST_TYPE_NUM, // binary operator
+  AST_TYPE_ROOT, // root(top of the tu) ast
 };
 
 #endif

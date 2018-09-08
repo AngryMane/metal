@@ -32,7 +32,7 @@
  
 %x text_state
 
-INTEGER       \-?[1-9][0-9]*|0
+INT_VAL       \-?[1-9][0-9]*|0
 SPACE         [ \t]*
 NEW_LINE      [\n\r]
 DIGIT         [0-9]
@@ -59,13 +59,13 @@ EQUAL         \=
 
 %%
 
-int                       {RETURN(INT);}
-void                      {RETURN(VOID);}
+int                       {RETURN(INT_TYPE);}
+void                      {RETURN(VOID_TYPE);}
 return                    {RETURN(RETURN);}
 def                       {RETURN(DEF);}
-true|false                {RETURN(BOOL);}
+true|false                {RETURN(BOOL_VAL);}
 {SYMBOL}                  {RETURN(SYMBOL);}
-{INTEGER}                 {RETURN_INT(INTEGER);}
+{INT_VAL}                 {RETURN_INT(INT_VAL);}
 
 \"                        {yy_push_state(text_state);}
 {SPACE}             

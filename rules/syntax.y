@@ -1,5 +1,4 @@
 /*
- * expr.y : Bisonマニュアル中の例に基づく
  *          Bisonによる簡単な表現式パーサ
  */
 
@@ -10,10 +9,10 @@
 #include "IntLiteralAST.h"
 #include "VarDeclAST.h"
 #include "VarRefAST.h"
-#include "BinaryOperatorAST.h"
 #include "FuncCallAST.h"
 #include "ReturnAST.h"
 #include "FunctionAST.h"
+#include "RootAST.h"
 
 }
 
@@ -46,8 +45,8 @@ yyFlexLexer* lexer;
 %token SYMBOL
 %token SEMICOLON
 %token TEXT
-%token INTEGER
-%token BOOL
+%token INT_VAL
+%token BOOL_VAL
 %token BRACKET_S
 %token BRACKET_E
 %token COLON
@@ -65,32 +64,37 @@ yyFlexLexer* lexer;
 %token PARENTHESE_S
 %token PARENTHESE_E
 %token RETURN
-%token INT
-%token VOID
+%token INT_TYPE
+%token VOID_TYPE
 
-%type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT VOID primary_type 
-%type <m_int> INTEGER 
-%type <m_bool> BOOL 
+%type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF 
+%type <m_string> PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT_TYPE VOID_TYPE primary_type 
+%type <m_int> INT_VAL
+%type <m_bool> BOOL_VAL
 
 // expression
-%type <m_BaseAST> expression add_expression multi_expression base_expression function_call 
+%type <m_BaseAST> expression 
 
 // statement
-%type <m_BaseAST> statement var_decl return projection_info function_decl 
+%type <m_BaseAST> statement var_decl return projection_info function_decl external_decl  root
 
-%type <m_BaseASTContainer> function_args var_decls statements function_body 
+%type <m_BaseASTContainer> var_decls statements function_body 
 
+// priority and associativity of operator
+%left PLUS MINUS
+%left ASTER SLASH
 
 %%
 
 //--------------------------------------------------------
 // global syntax 
 
-root       :
-           | external_decl root
+root       :                    {$$ = new RootAST();}
+           | external_decl root {$$ = $2;dynamic_cast<RootAST*>($$)->AddDecl($1);}
            ;
 
-external_decl : function_decl 
+external_decl : function_decl  {$$ = $1;}
+              | statement {$$ = $1;}
               ;
 
 function_decl : projection_info function_body {$$ = $1;dynamic_cast<FunctionAST*>($$)->SetStatements(*$2);}
@@ -106,8 +110,8 @@ function_body : BRACE_S statements BRACE_E {$$ = $2;}
 //--------------------------------------------------------
 // primary type
 
-primary_type : INT
-             | VOID
+primary_type : INT_TYPE
+             | VOID_TYPE
              ;
 
 //--------------------------------------------------------
@@ -132,27 +136,16 @@ return  : RETURN expression {$$ = new ReturnAST($2);}
 //--------------------------------------------------------
 // expression
 
-expression : add_expression {$$ = $1;}
-           | function_call  {$$ = $1;}
+expression : expression PLUS expression {$$ = NULL;std::cout << "PLUS" << std::endl;}
+           | expression MINUS expression {$$ = NULL;std::cout << "MINUS" << std::endl;}  
+           | expression ASTER expression {$$ = NULL;std::cout << "ASTER" << std::endl;}
+           | expression SLASH expression {$$ = NULL;std::cout << "SLASH" << std::endl;}
+           | PARENTHESE_S expression PLUS expression PARENTHESE_E {$$ = NULL;std::cout << "(PLUS)" << std::endl;}
+           | PARENTHESE_S expression MINUS expression PARENTHESE_E {$$ = NULL;std::cout << "(MINUS)" << std::endl;}
+           | PARENTHESE_S expression ASTER expression PARENTHESE_E {$$ = NULL;std::cout << "(ASTER)" << std::endl;}
+           | PARENTHESE_S expression SLASH expression PARENTHESE_E {$$ = NULL;std::cout << "(SLASH)" << std::endl;}
+           | INT_VAL {$$ = NULL;}
            ;
-
-add_expression : multi_expression PLUS multi_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
-               | multi_expression MINUS multi_expression{$$ = new BinaryOperatorAST($2, $1, $3);}
-               | multi_expression                       {$$ = $1;}
-               ;
-
-multi_expression : base_expression                       {$$ = $1;}
-                 | base_expression ASTER base_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
-                 | base_expression SLASH base_expression {$$ = new BinaryOperatorAST($2, $1, $3);}
-                 ;
-
-base_expression : INTEGER                                  {$$ = new IntLiteralAST($1);}
-                | SYMBOL                                   {$$ = new VarRefAST($1);}
-                | PARENTHESE_S add_expression PARENTHESE_E {$$ = $2;}
-                ;
-
-function_call : SYMBOL PARENTHESE_S function_args PARENTHESE_E {$$ = new FuncCallAST($1, *$3);}
-              ;
 
 //--------------------------------------------------------
 // other
@@ -160,11 +153,6 @@ function_call : SYMBOL PARENTHESE_S function_args PARENTHESE_E {$$ = new FuncCal
 var_decls : var_decl                 {$$ = new std::vector<BaseAST*>;$$->push_back($1);}
           | var_decl COMMA var_decls {$$ = $3;$$->push_back($1);}
           ;
-
-function_args :                            {$$ = new std::vector<BaseAST*>;}
-              | SYMBOL                     {$$ = new std::vector<BaseAST*>;$$->push_back(new VarRefAST($1));}
-              | SYMBOL COMMA function_args {$$ = $3;$$->push_back(new VarRefAST($1));}
-              ;
 
 //--------------------------------------------------------
 

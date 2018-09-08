@@ -16,6 +16,11 @@ BISON_TARGET += syntax.y
 BISON_INPUTS = $(addprefix $(RULE_DIR)/, $(BISON_TARGET))
 BISON_FLAGS = -d -o$(SRC_DIR)/syntax.cpp
 
+LLVM_PATH = /usr/lib/llvm-6.0
+LLVM_INC = $(LLVM_PATH)/include
+LLVM_LIB = $(LLVM_PATH)/lib
+VAPTH = $(LLVM_INC):$(LLVM_LIB)
+
 all: generate compile
 
 generate: flex bison move

@@ -6,6 +6,7 @@
 
 #include "external.h"
 #include "BaseAST.h"
+#include "ExpressionAST.h"
 #include "IntLiteralAST.h"
 #include "VarDeclAST.h"
 #include "VarRefAST.h"
@@ -18,12 +19,13 @@
 
 %{
 
+#include "external.h"
 #include "FlexLexer.h"
 
 // Bisonで生成するコードが参照する関数
 // 定義がライブラリ(libfl.a)内に存在する
 // ライブラリをリンクしたくないため、自分で定義する。
-void yyerror(const char *s);
+void yyerror(llvm::LLVMContext& context, llvm::Module* module, llvm::IRBuilder<>& builder, const char *s);
 
 // Bisonで生成するコードが参照する関数
 // Flex++はyyFlexLexer::yylex()になるため、ラッパを自前で定義する
@@ -39,8 +41,14 @@ yyFlexLexer* lexer;
   int m_int;
   bool m_bool;
   BaseAST* m_BaseAST;
+  ExpressionAST* m_ExpressionAST;
+  IntLiteralAST* m_IntLiteralAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 }
+
+%parse-param      {llvm::LLVMContext& context}
+%parse-param      {llvm::Module* module}
+%parse-param      {llvm::IRBuilder<>& builder}
 
 %token SYMBOL
 %token SEMICOLON
@@ -73,7 +81,8 @@ yyFlexLexer* lexer;
 %type <m_bool> BOOL_VAL
 
 // expression
-%type <m_BaseAST> expression 
+%type <m_ExpressionAST> expression 
+%type <m_IntLiteralAST> int_literal 
 
 // statement
 %type <m_BaseAST> statement var_decl return projection_info function_decl external_decl  root
@@ -144,8 +153,11 @@ expression : expression PLUS expression {$$ = NULL;std::cout << "PLUS" << std::e
            | PARENTHESE_S expression MINUS expression PARENTHESE_E {$$ = NULL;std::cout << "(MINUS)" << std::endl;}
            | PARENTHESE_S expression ASTER expression PARENTHESE_E {$$ = NULL;std::cout << "(ASTER)" << std::endl;}
            | PARENTHESE_S expression SLASH expression PARENTHESE_E {$$ = NULL;std::cout << "(SLASH)" << std::endl;}
-           | INT_VAL {$$ = NULL;}
-           ;
+           | int_literal {$$ = new ExpressionAST($1);}
+             ;
+             
+int_literal : INT_VAL {$$ = new IntLiteralAST($1);}
+              ;
 
 //--------------------------------------------------------
 // other
@@ -159,7 +171,7 @@ var_decls : var_decl                 {$$ = new std::vector<BaseAST*>;$$->push_ba
 
 %%
 
-void yyerror(const char *s){
+void yyerror(llvm::LLVMContext& context, llvm::Module* module, llvm::IRBuilder<>& builder, const char *s){
   std::cout << "Syntax error" << std::endl;
   std::cout << "Reduction failed in:" << std::endl;
   std::cout << "Line :" << lexer->lineno() << std::endl;
@@ -167,7 +179,7 @@ void yyerror(const char *s){
 }
 
 int yylex(void){
-  return lexer->yylex();;
+  return lexer->yylex();
 }
 
 int main(){
@@ -180,7 +192,10 @@ int main(){
 
   std::istream ifs(&file);
   lexer = new yyFlexLexer(&ifs);
-  yyparse();
+  llvm::LLVMContext context;
+  llvm::Module *module = new llvm::Module("top", context);
+  llvm::IRBuilder<> builder(context);
+  yyparse(context, module, builder);
   delete lexer;
 
   return 0;

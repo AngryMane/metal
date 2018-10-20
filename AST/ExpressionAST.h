@@ -1,25 +1,23 @@
-#ifndef INTLITERAL_H
-#define INTLITERAL_H
+#ifndef EXPRESSIONAST_H
+#define EXPRESSIONAST_H
 
 #include "ASTCommon.h"
-#include "ASTMacro.h"
 #include "BaseAST.h"
-#include "external.h"
 
-class IntLiteralAST : public BaseAST {
-
+class ExpressionAST : public BaseAST {
 public: // initialize/filnalize
 
   // constructor
-  IntLiteralAST(
-    int value)
-    : BaseAST(AST_TYPE_INT_LITERAL)
+  ExpressionAST(
+	 BaseAST* value)
+    : BaseAST(AST_TYPE_EXPRESSION)
 	 , m_Value(value){
-     }
+  }
 
   // destructor
   virtual
-  ~IntLiteralAST(){
+  ~ExpressionAST(){
+	  delete m_Value;
   }
 
 public: // operation
@@ -31,10 +29,8 @@ public: // operation
     llvm::LLVMContext& context,
     llvm::Module* module,
     llvm::IRBuilder<> builder){
-	  return llvm::ConstantInt::get(builder.getInt64Ty(), m_Value);
+	  return m_Value->GenerateValue(context, module, builder);
   }
-
-public: // operation
 
 public: // query
 
@@ -42,8 +38,8 @@ private: // private methods
 
 private: // private member vars
 
-  // value
-  MEMBER_WITH_GET(int, Value)
+  // Literal expression
+  BaseAST* m_Value;
 
 };
 

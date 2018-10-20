@@ -4,7 +4,7 @@
 
 %code requires{
 
-#include "ParserDef.h"
+#include "external.h"
 #include "BaseAST.h"
 #include "IntLiteralAST.h"
 #include "VarDeclAST.h"

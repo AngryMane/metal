@@ -27,7 +27,6 @@ bison:
 	$(BISON) $(BISON_FLAGS) $(BISON_INPUTS) 
 
 move:
-	cp $(RULE_DIR)/*.h $(SRC_DIR)
 	cp $(AST_DIR)/*.h $(SRC_DIR)
 	cp $(AST_DIR)/*.cpp $(SRC_DIR)
 

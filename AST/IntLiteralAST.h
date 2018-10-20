@@ -13,9 +13,9 @@ public: // initialize/filnalize
   // constructor
   IntLiteralAST(
     int value)
-    : m_Value(value)
-    , BaseAST(AST_TYPE_INT_LITERAL){
-  }
+    : BaseAST(AST_TYPE_INT_LITERAL)
+	 , m_Value(value){
+     }
 
   // destructor
   virtual

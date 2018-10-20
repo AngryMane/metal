@@ -3,6 +3,7 @@
 
 #include "ASTCommon.h"
 #include "ASTMacro.h"
+#include "external.h"
 
 class BaseAST {
 
@@ -20,6 +21,16 @@ public: // initialize/filnalize
   }
 
 public: // operation
+
+  // generate
+  virtual
+  llvm::Value*
+  GenerateValue(
+    llvm::LLVMContext& context,
+    llvm::Module* module,
+    llvm::IRBuilder<> builder){
+	  return NULL;
+  }
 
 public: // query
 

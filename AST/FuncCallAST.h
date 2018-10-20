@@ -15,9 +15,9 @@ public: // initialize/filnalize
   FuncCallAST(
     std::string func_name, 
     std::vector<BaseAST*> args)
-    : m_FuncName(func_name)
-    , m_FuncArgs(args)
-    , BaseAST(AST_TYPE_FUNC_CALL){
+    : BaseAST(AST_TYPE_FUNC_CALL)
+    , m_FuncName(func_name)
+    , m_FuncArgs(args){
   }
 
   // destructor

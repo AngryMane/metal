@@ -12,8 +12,8 @@ public: // initialize/filnalize
   // constructor
   ReturnAST(
     BaseAST* ret)
-    : m_Ret(ret)
-    , BaseAST(AST_TYPE_RETURN){
+    : BaseAST(AST_TYPE_RETURN)
+    , m_Ret(ret){
   }
 
   // destructor

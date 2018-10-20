@@ -11,8 +11,8 @@ public: // initialize/filnalize
 
   // constructor
   RootAST()
-    : m_Decls()
-    , BaseAST(AST_TYPE_ROOT){
+    : BaseAST(AST_TYPE_ROOT)
+    , m_Decls(){
   }
 
   // destructor

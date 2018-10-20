@@ -12,8 +12,8 @@ public: // initialize/filnalize
   // constructor
   VarRefAST(
     std::string name)
-    : m_Name(name)
-    , BaseAST(AST_TYPE_VAR_REF){
+    : BaseAST(AST_TYPE_VAR_REF)
+    , m_Name(name){
   }
 
   // destructor

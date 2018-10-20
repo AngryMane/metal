@@ -16,11 +16,6 @@ BISON_TARGET += syntax.y
 BISON_INPUTS = $(addprefix $(RULE_DIR)/, $(BISON_TARGET))
 BISON_FLAGS = -d -o$(SRC_DIR)/syntax.cpp
 
-LLVM_PATH = /usr/lib/llvm-6.0
-LLVM_INC = $(LLVM_PATH)/include
-LLVM_LIB = $(LLVM_PATH)/lib
-VAPTH = $(LLVM_INC):$(LLVM_LIB)
-
 all: generate compile
 
 generate: flex bison move
@@ -37,7 +32,7 @@ move:
 	cp $(AST_DIR)/*.cpp $(SRC_DIR)
 
 compile:
-	$(CC) $(CFLANGS) $(SRC_DIR)/token.cpp $(SRC_DIR)/syntax.cpp 
+	$(CC) $(CFLANGS) $(SRC_DIR)/token.cpp $(SRC_DIR)/syntax.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core`
 
 clean:
 	rm -rf $(SRC_DIR)/*

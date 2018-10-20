@@ -24,9 +24,10 @@ public: // initialize/filnalize
   VarDeclAST(
     std::string name,
     VAR_TYPE type)
-    : m_Name(name)
-    , m_VarType(type)
-    , BaseAST(AST_TYPE_VAR_DECL){
+    : BaseAST(AST_TYPE_VAR_DECL)
+    , m_Name(name)
+    , m_Value(0)
+    , m_VarType(type){
   }
 
   // destructor

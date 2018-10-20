@@ -28,12 +28,12 @@ struct Data{
 struct Text : public Data{
 
   Text()
-  : value_()
-  , Data(DATA_TYPE_TEXT){}
+  : Data(DATA_TYPE_TEXT)
+  , value_(){}
 
   Text(std::string value)
-  : value_(value)
-  , Data(DATA_TYPE_TEXT){}
+  : Data(DATA_TYPE_TEXT)
+  , value_(){}
 
   Text operator+(const Text& rhs){
     return Text(value_ + rhs.value_);
@@ -65,10 +65,10 @@ struct PropertyBase : public Data{
     std::string id,
     std::string name,
     std::string prop_type)
-  : id_(id)
+  : Data(DATA_TYPE_PROPERTY)
+  , id_(id)
   , name_(name)
-  , prop_type_(prop_type)
-  , Data(DATA_TYPE_PROPERTY){}
+  , prop_type_(prop_type){}
 
   std::string id_;
   std::string name_;
@@ -82,8 +82,8 @@ struct SimpleProperty : public PropertyBase{
     std::string name,
     std::string prop_type,
     std::string value)
-  : value_(value)
-  , PropertyBase(id, name, prop_type){}
+  : PropertyBase(id, name, prop_type)
+  , value_(value){}
 
   std::string value_;
 };

@@ -14,11 +14,11 @@ public: // initialize/filnalize
   FunctionAST(
     std::string name,
     std::string type)
-    : m_Name(name)
+    : BaseAST(AST_TYPE_FUNCTION)
     , m_ValueType(type)
+    , m_Name(name)
     , m_Args()
-    , m_Statements()
-    , BaseAST(AST_TYPE_FUNCTION){
+    , m_Statements(){
   }
 
   // constructor
@@ -26,11 +26,11 @@ public: // initialize/filnalize
     std::string name,
     std::string type,
     std::vector<BaseAST*> args)
-    : m_Name(name)
+    : BaseAST(AST_TYPE_FUNCTION)
     , m_ValueType(type)
+    , m_Name(name)
     , m_Args(args)
-    , m_Statements()
-    , BaseAST(AST_TYPE_FUNCTION){
+    , m_Statements(){
   }
 
   // destructor

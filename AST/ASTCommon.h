@@ -16,4 +16,19 @@ enum AST_TYPE{
   AST_TYPE_EXPRESSION, // expression ast
 };
 
+// Context struct
+struct ParseContext{
+	 ParseContext(
+        llvm::LLVMContext* context,
+        llvm::Module* module,
+        llvm::IRBuilder<>* builder)
+	     : m_Context(context)
+	     , m_Module(module)
+	     , m_Builder(builder){
+	 }
+    llvm::LLVMContext* m_Context;
+    llvm::Module* m_Module;
+    llvm::IRBuilder<>* m_Builder;
+};
+
 #endif

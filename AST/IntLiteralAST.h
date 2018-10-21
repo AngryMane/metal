@@ -28,10 +28,8 @@ public: // operation
   virtual
   llvm::Value*
   GenerateValue(
-    llvm::LLVMContext& context,
-    llvm::Module* module,
-    llvm::IRBuilder<> builder){
-	  return llvm::ConstantInt::get(builder.getInt64Ty(), m_Value);
+    ParseContext& parse_context){
+	  return llvm::ConstantInt::get(parse_context.m_Builder->getInt64Ty(), m_Value);
   }
 
 public: // operation

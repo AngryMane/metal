@@ -23,6 +23,17 @@ public: // initialize/filnalize
 
 public: // operation
 
+  // generate
+  virtual
+  llvm::Value*
+  GenerateValue(
+    ParseContext& parse_context){
+	  for (auto* cur : m_Decls){
+		  cur->GenerateValue(parse_context);
+	  }
+	  return NULL;
+  }
+
   void AddDecl(
     BaseAST* decl){
     m_Decls.push_back(decl);

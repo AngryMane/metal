@@ -26,10 +26,8 @@ public: // operation
   virtual
   llvm::Value*
   GenerateValue(
-    llvm::LLVMContext& context,
-    llvm::Module* module,
-    llvm::IRBuilder<> builder){
-	  return m_Value->GenerateValue(context, module, builder);
+    ParseContext& parse_context){
+	  return m_Value->GenerateValue(parse_context);
   }
 
 public: // query

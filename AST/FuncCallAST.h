@@ -30,6 +30,14 @@ public: // initialize/filnalize
 
 public: // operation
 
+  // generate
+  virtual
+  llvm::Value*
+  GenerateValue(
+    ParseContext& parse_context){
+	  return NULL;
+  }
+
 public: // operation
 
 public: // query

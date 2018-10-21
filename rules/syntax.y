@@ -7,6 +7,7 @@
 #include "external.h"
 #include "BaseAST.h"
 #include "ExpressionAST.h"
+#include "BinaryOperatorAST.h"
 #include "IntLiteralAST.h"
 #include "VarDeclAST.h"
 #include "VarRefAST.h"
@@ -20,12 +21,14 @@
 %{
 
 #include "external.h"
+#include "ASTCommon.h"
+#include "BaseAST.h"
 #include "FlexLexer.h"
 
 // Bisonで生成するコードが参照する関数
 // 定義がライブラリ(libfl.a)内に存在する
 // ライブラリをリンクしたくないため、自分で定義する。
-void yyerror(llvm::LLVMContext& context, llvm::Module* module, llvm::IRBuilder<>& builder, const char *s);
+void yyerror(ParseContext& parse_context, BaseAST** ret, const char *s);
 
 // Bisonで生成するコードが参照する関数
 // Flex++はyyFlexLexer::yylex()になるため、ラッパを自前で定義する
@@ -41,14 +44,14 @@ yyFlexLexer* lexer;
   int m_int;
   bool m_bool;
   BaseAST* m_BaseAST;
+  RootAST* m_RootAST;
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 }
 
-%parse-param      {llvm::LLVMContext& context}
-%parse-param      {llvm::Module* module}
-%parse-param      {llvm::IRBuilder<>& builder}
+%parse-param      {ParseContext& parse_context}
+%parse-param      {BaseAST** ret}
 
 %token SYMBOL
 %token SEMICOLON
@@ -80,12 +83,15 @@ yyFlexLexer* lexer;
 %type <m_int> INT_VAL
 %type <m_bool> BOOL_VAL
 
+// root
+%type <m_RootAST> root 
+
 // expression
 %type <m_ExpressionAST> expression 
 %type <m_IntLiteralAST> int_literal 
 
 // statement
-%type <m_BaseAST> statement var_decl return projection_info function_decl external_decl  root
+%type <m_BaseAST> statement var_decl return function_header  function_decl external_decl
 
 %type <m_BaseASTContainer> var_decls statements function_body 
 
@@ -98,23 +104,26 @@ yyFlexLexer* lexer;
 //--------------------------------------------------------
 // global syntax 
 
-root       :                    {$$ = new RootAST();}
-           | external_decl root {$$ = $2;dynamic_cast<RootAST*>($$)->AddDecl($1);}
+root       :                    {$$ = new RootAST();*ret = $$;}
+           | external_decl root {$$ = $2;$$->AddDecl($1);}
            ;
 
 external_decl : function_decl  {$$ = $1;}
               | statement {$$ = $1;}
-              ;
-
-function_decl : projection_info function_body {$$ = $1;dynamic_cast<FunctionAST*>($$)->SetStatements(*$2);}
-              ;
-
-projection_info : DEF SYMBOL COLON PROJECTION_ARROW primary_type           {$$ = new FunctionAST($2, $5);}
-                | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type {$$ = new FunctionAST($2, $6, *$4);}
                 ;
 
+//--------------------------------------------------------
+// function
+
+function_decl : function_header function_body {$$ = $1;dynamic_cast<FunctionAST*>($$)->SetStatements(*$2);}
+                ;
+
+function_header : DEF SYMBOL COLON PROJECTION_ARROW primary_type           {$$ = new FunctionAST($2, $5);}
+                | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type {$$ = new FunctionAST($2, $6, *$4);}
+                  ;
+
 function_body : BRACE_S statements BRACE_E {$$ = $2;}
-              ;
+                ;
 
 //--------------------------------------------------------
 // primary type
@@ -145,14 +154,14 @@ return  : RETURN expression {$$ = new ReturnAST($2);}
 //--------------------------------------------------------
 // expression
 
-expression : expression PLUS expression {$$ = NULL;std::cout << "PLUS" << std::endl;}
-           | expression MINUS expression {$$ = NULL;std::cout << "MINUS" << std::endl;}  
-           | expression ASTER expression {$$ = NULL;std::cout << "ASTER" << std::endl;}
-           | expression SLASH expression {$$ = NULL;std::cout << "SLASH" << std::endl;}
-           | PARENTHESE_S expression PLUS expression PARENTHESE_E {$$ = NULL;std::cout << "(PLUS)" << std::endl;}
-           | PARENTHESE_S expression MINUS expression PARENTHESE_E {$$ = NULL;std::cout << "(MINUS)" << std::endl;}
-           | PARENTHESE_S expression ASTER expression PARENTHESE_E {$$ = NULL;std::cout << "(ASTER)" << std::endl;}
-           | PARENTHESE_S expression SLASH expression PARENTHESE_E {$$ = NULL;std::cout << "(SLASH)" << std::endl;}
+expression : expression PLUS expression {auto* bi = new BinaryOperatorAST($2, $1, $3);$$ = new ExpressionAST(bi);}
+           | expression MINUS expression {auto* bi = new BinaryOperatorAST($2, $1, $3);$$ = new ExpressionAST(bi);}  
+           | expression ASTER expression {auto* bi = new BinaryOperatorAST($2, $1, $3);$$ = new ExpressionAST(bi);}
+           | expression SLASH expression {auto* bi = new BinaryOperatorAST($2, $1, $3);$$ = new ExpressionAST(bi);}
+           | PARENTHESE_S expression PLUS expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
+           | PARENTHESE_S expression MINUS expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
+           | PARENTHESE_S expression ASTER expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
+           | PARENTHESE_S expression SLASH expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
            | int_literal {$$ = new ExpressionAST($1);}
              ;
              
@@ -171,7 +180,7 @@ var_decls : var_decl                 {$$ = new std::vector<BaseAST*>;$$->push_ba
 
 %%
 
-void yyerror(llvm::LLVMContext& context, llvm::Module* module, llvm::IRBuilder<>& builder, const char *s){
+void yyerror(ParseContext& parse_context, BaseAST** ret, const char *s){
   std::cout << "Syntax error" << std::endl;
   std::cout << "Reduction failed in:" << std::endl;
   std::cout << "Line :" << lexer->lineno() << std::endl;
@@ -184,8 +193,8 @@ int yylex(void){
 
 int main(){
   std::filebuf file;
-  bool ret = file.open("./result/target.cpp", std::ios::in);
-  if (ret == false){
+  bool is_open = file.open("./result/target.cpp", std::ios::in);
+  if (is_open == false){
     std::cout << "Open target file failed" << std::endl;
     return 1;
   }
@@ -195,8 +204,13 @@ int main(){
   llvm::LLVMContext context;
   llvm::Module *module = new llvm::Module("top", context);
   llvm::IRBuilder<> builder(context);
-  yyparse(context, module, builder);
+
+  ParseContext parse_context(&context, module, &builder);
+
+  BaseAST* ret = NULL;
+  yyparse(parse_context, &ret);
   delete lexer;
+  delete ret;
 
   return 0;
 }

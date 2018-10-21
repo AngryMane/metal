@@ -37,12 +37,12 @@ public: // initialize/filnalize
     std::string op,
     ExpressionAST* lhs,
     ExpressionAST* rhs)
-    : m_OperatorType(OPERATOR_TYPE_PLUS)
+    : BaseAST(AST_TYPE_BINARY_OPERATOR)
+    , m_OperatorType(OPERATOR_TYPE_PLUS)
     , m_LeftOperand(lhs)
-    , m_RightOperand(rhs)
-    , BaseAST(AST_TYPE_BINARY_OPERATOR){
+    , m_RightOperand(rhs){
 	auto itr = OPERATOR_CONVERTOR.find(op);
-    m_OperatorType = (itr == OPERATOR_CONVERTOR.end())? (OPERATOR_TYPE_UNKNOWN) : (*itr);
+    m_OperatorType = (itr == OPERATOR_CONVERTOR.end())? (OPERATOR_TYPE_UNKNOWN) : (itr->second);
   }
 
   // destructor
@@ -58,39 +58,21 @@ public: // operation
   virtual
   llvm::Value*
   GenerateValue(
-    llvm::LLVMContext& context,
-    llvm::Module* module,
-    llvm::IRBuilder<> builder){
-	 llvm::Value*  ret = NULL;
-	  switch(m_OperatorType){
-      OPERATOR_TYPE_PLUS:
-	  ret = builder.CreateAdd(
-			  m_LeftOperand->GenerateValue(context, module, builder),
-			  m_RightOperand->GenerateValue(context, module, builder));
-		break;
-      OPERATOR_TYPE_MINUS:
-	  ret = builder.CreateSub(
-			  m_LeftOperand->GenerateValue(context, module, builder),
-			  m_RightOperand->GenerateValue(context, module, builder));
-		break;
-      OPERATOR_TYPE_ASTER:
-	  ret = builder.CreateMul(
-			  m_LeftOperand->GenerateValue(context, module, builder),
-			  m_RightOperand->GenerateValue(context, module, builder));
-		break;
-      OPERATOR_TYPE_SLASH:
-	  ret = builder.CreateUDiv(
-			  m_LeftOperand->GenerateValue(context, module, builder),
-			  m_RightOperand->GenerateValue(context, module, builder));
-		break;
-      OPERATOR_TYPE_HAT:
-	    // TODO
-		break;
-      OPERATOR_TYPE_UNKNOWN:
-	   fprintf(stderr, "[error]unknown operator\n");
-		break;
-	  }
-	  return ret;
+    ParseContext& parse_context){
+	 typedef std::function<llvm::Value*(llvm::Value *LHS, llvm::Value *RHS)> GENERATOR_FUNCTION;
+	 GENERATOR_FUNCTION add = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
+	 GENERATOR_FUNCTION sub = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
+	 GENERATOR_FUNCTION mul = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
+	 GENERATOR_FUNCTION div = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
+	 GENERATOR_FUNCTION hat = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
+	 GENERATOR_FUNCTION generator =
+			 (OPERATOR_TYPE_PLUS == m_OperatorType) ? (add) :
+			 (OPERATOR_TYPE_MINUS == m_OperatorType) ? (sub) :
+			 (OPERATOR_TYPE_ASTER == m_OperatorType) ? (mul) :
+			 (OPERATOR_TYPE_SLASH == m_OperatorType) ? (div) :
+			 (OPERATOR_TYPE_HAT == m_OperatorType) ? (hat) :
+			 (0);
+	 return generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
   }
 
 public: // operation

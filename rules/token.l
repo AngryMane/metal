@@ -15,9 +15,9 @@
 #include <stdio.h>
 #include "syntax.hpp"
 
-//#define DEBUG
+//#define METAL_DEBUG
 
-#ifdef DEBUG
+#ifdef METAL_DEBUG
 #define PRINT(s) printf(s);printf(" ");
 #else
 #define PRINT(s)

@@ -30,7 +30,7 @@ public: // initialize/filnalize
     , m_ValueType(type)
     , m_Name(name)
     , m_Args(args)
-    , m_Statements(){
+    , m_Statements(NULL){
   }
 
   // destructor
@@ -40,9 +40,10 @@ public: // initialize/filnalize
       delete cur;
     }
 
-    for (auto cur : m_Statements){
+    for (auto cur : *m_Statements){
       delete cur;
     }
+    delete m_Statements;
   }
 
 public: // operation
@@ -52,7 +53,14 @@ public: // operation
   llvm::Value*
   GenerateValue(
     ParseContext& parse_context){
-	  return NULL;
+    auto *funcType = llvm::FunctionType::get(parse_context.m_Builder->getInt64Ty(), false);
+    auto *mainFunc = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, m_Name, parse_context.m_Module);
+    auto *entrypoint = llvm::BasicBlock::Create(*parse_context.m_Context, "entry-point", mainFunc);
+    parse_context.m_Builder->SetInsertPoint(entrypoint);
+
+    for (auto cur : *m_Statements){
+      cur->GenerateValue(parse_context);
+    }
   }
 
 public: // operation
@@ -69,7 +77,7 @@ private: // private member vars
 
   MEMBER_WITH_GET(std::vector<BaseAST*>, Args)
 
-  MEMBER_WITH_GET_SET(std::vector<BaseAST*>, Statements)
+  MEMBER_WITH_GET_SET(std::vector<BaseAST*>*, Statements)
 
 };
 

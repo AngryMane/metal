@@ -45,6 +45,7 @@ yyFlexLexer* lexer;
   bool m_bool;
   BaseAST* m_BaseAST;
   RootAST* m_RootAST;
+  FunctionAST* m_FunctionAST;
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
@@ -90,8 +91,11 @@ yyFlexLexer* lexer;
 %type <m_ExpressionAST> expression 
 %type <m_IntLiteralAST> int_literal 
 
+// function decl
+%type <m_FunctionAST> function_decl function_header 
+
 // statement
-%type <m_BaseAST> statement var_decl return function_header  function_decl external_decl
+%type <m_BaseAST> statement var_decl return external_decl
 
 %type <m_BaseASTContainer> var_decls statements function_body 
 
@@ -106,7 +110,7 @@ yyFlexLexer* lexer;
 
 root       :                    {$$ = new RootAST();*ret = $$;}
            | external_decl root {$$ = $2;$$->AddDecl($1);}
-           ;
+             ;
 
 external_decl : function_decl  {$$ = $1;}
               | statement {$$ = $1;}
@@ -115,7 +119,7 @@ external_decl : function_decl  {$$ = $1;}
 //--------------------------------------------------------
 // function
 
-function_decl : function_header function_body {$$ = $1;dynamic_cast<FunctionAST*>($$)->SetStatements(*$2);}
+function_decl : function_header function_body {$$ = $1;$$->SetStatements($2);}
                 ;
 
 function_header : DEF SYMBOL COLON PROJECTION_ARROW primary_type           {$$ = new FunctionAST($2, $5);}
@@ -142,7 +146,7 @@ statements :                      {$$ = new std::vector<BaseAST*>;}
 statement : var_decl SEMICOLON   {$$ = $1;}
           | return SEMICOLON     {$$ = $1;}
           | expression SEMICOLON {$$ = $1;}
-          ;
+            ;
 
 var_decl  : primary_type SYMBOL                         {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
           | primary_type SYMBOL VAR_INIT_DEF expression {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
@@ -209,6 +213,14 @@ int main(){
 
   BaseAST* ret = NULL;
   yyparse(parse_context, &ret);
+  llvm::Value* value = ret->GenerateValue(parse_context);
+
+  std::error_code error_info;
+  llvm::raw_fd_ostream raw_stream("out.ll", error_info, llvm::sys::fs::OpenFlags::F_None);
+  module->print(raw_stream, nullptr);
+  module->print(llvm::outs(), nullptr);
+  llvm::WriteBitcodeToFile(module, raw_stream);
+
   delete lexer;
   delete ret;
 

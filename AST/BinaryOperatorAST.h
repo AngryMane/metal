@@ -59,6 +59,7 @@ public: // operation
   llvm::Value*
   GenerateValue(
     ParseContext& parse_context){
+
 	 typedef std::function<llvm::Value*(llvm::Value *LHS, llvm::Value *RHS)> GENERATOR_FUNCTION;
 	 GENERATOR_FUNCTION add = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
 	 GENERATOR_FUNCTION sub = std::bind(&llvm::IRBuilder<>::CreateAdd, parse_context.m_Builder, std::placeholders::_1, std::placeholders::_2, "", false, false);
@@ -72,7 +73,12 @@ public: // operation
 			 (OPERATOR_TYPE_SLASH == m_OperatorType) ? (div) :
 			 (OPERATOR_TYPE_HAT == m_OperatorType) ? (hat) :
 			 (0);
-	 return generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
+
+    llvm::Value* result = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty());
+    auto* keisan = generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
+    auto* ret = parse_context.m_Builder->CreateStore(keisan, result);
+
+    return parse_context.m_Builder->CreateLoad(result);
   }
 
 public: // operation

@@ -9,6 +9,7 @@
 #include "ExpressionAST.h"
 #include "BinaryOperatorAST.h"
 #include "IntLiteralAST.h"
+#include "FloatLiteralAST.h"
 #include "VarDeclAST.h"
 #include "VarRefAST.h"
 #include "FuncCallAST.h"
@@ -42,12 +43,14 @@ yyFlexLexer* lexer;
 %union {
   char m_string[128];
   int m_int;
+  float m_float;
   bool m_bool;
   BaseAST* m_BaseAST;
   RootAST* m_RootAST;
   FunctionAST* m_FunctionAST;
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
+  FloatLiteralAST* m_FloatLiteralAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 }
 
@@ -58,6 +61,7 @@ yyFlexLexer* lexer;
 %token SEMICOLON
 %token TEXT
 %token INT_VAL
+%token FLOAT_VAL
 %token BOOL_VAL
 %token BRACKET_S
 %token BRACKET_E
@@ -77,11 +81,14 @@ yyFlexLexer* lexer;
 %token PARENTHESE_E
 %token RETURN
 %token INT_TYPE
+%token FLOAT_TYPE
 %token VOID_TYPE
+%token STRING_TYPE
 
 %type <m_string> SYMBOL SEMICOLON TEXT BRACKET_S BRACKET_E COLON BRACE_S BRACE_E DEF COMMA PLUS MINUS ASTER SLASH EQUAL VAR_INIT_DEF 
-%type <m_string> PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT_TYPE VOID_TYPE primary_type 
+%type <m_string> PROJECTION_ARROW PARENTHESE_S PARENTHESE_E RETURN INT_TYPE VOID_TYPE FLOAT_TYPE STRING_TYPE primary_type 
 %type <m_int> INT_VAL
+%type <m_float> FLOAT_VAL
 %type <m_bool> BOOL_VAL
 
 // root
@@ -90,6 +97,7 @@ yyFlexLexer* lexer;
 // expression
 %type <m_ExpressionAST> expression 
 %type <m_IntLiteralAST> int_literal 
+%type <m_FloatLiteralAST> float_literal 
 
 // function decl
 %type <m_FunctionAST> function_decl function_header 
@@ -110,11 +118,11 @@ yyFlexLexer* lexer;
 
 root       :                    {$$ = new RootAST();*ret = $$;}
            | external_decl root {$$ = $2;$$->AddDecl($1);}
-             ;
+           ;
 
 external_decl : function_decl  {$$ = $1;}
               | statement {$$ = $1;}
-                ;
+              ;
 
 //--------------------------------------------------------
 // function
@@ -124,7 +132,7 @@ function_decl : function_header function_body {$$ = $1;$$->SetStatements($2);}
 
 function_header : DEF SYMBOL COLON PROJECTION_ARROW primary_type           {$$ = new FunctionAST($2, $5);}
                 | DEF SYMBOL COLON var_decls PROJECTION_ARROW primary_type {$$ = new FunctionAST($2, $6, *$4);}
-                  ;
+                ;
 
 function_body : BRACE_S statements BRACE_E {$$ = $2;}
                 ;
@@ -134,6 +142,8 @@ function_body : BRACE_S statements BRACE_E {$$ = $2;}
 
 primary_type : INT_TYPE
              | VOID_TYPE
+             | FLOAT_TYPE 
+             | STRING_TYPE 
              ;
 
 //--------------------------------------------------------
@@ -153,6 +163,7 @@ var_decl  : primary_type SYMBOL                         {$$ = new VarDeclAST($2,
           ;
 
 return  : RETURN expression {$$ = new ReturnAST($2);}
+        | RETURN {$$ = new ReturnAST(NULL);}
         ;
 
 //--------------------------------------------------------
@@ -167,9 +178,13 @@ expression : expression PLUS expression {auto* bi = new BinaryOperatorAST($2, $1
            | PARENTHESE_S expression ASTER expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
            | PARENTHESE_S expression SLASH expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
            | int_literal {$$ = new ExpressionAST($1);}
-             ;
+           | float_literal {$$ = new ExpressionAST($1);}
+           ;
              
 int_literal : INT_VAL {$$ = new IntLiteralAST($1);}
+              ;
+
+float_literal : FLOAT_VAL {$$ = new FloatLiteralAST($1);}
               ;
 
 //--------------------------------------------------------

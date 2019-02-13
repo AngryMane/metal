@@ -1,5 +1,4 @@
-/*FLEXのルールファイルは以下の構造を持つ
- *
+/*FLEXのルールファイルは以下の構造を持つ *
  * {%
  * Cコード(宣言部)
  * %}
@@ -25,6 +24,7 @@
 
 #define RETURN(TOKEN) memcpy(yylval.m_string,yytext, std::min(yyleng, 128));PRINT(#TOKEN);return TOKEN
 #define RETURN_INT(TOKEN) yylval.m_int=std::stoi(yytext);PRINT(#TOKEN);return TOKEN
+#define RETURN_FLOAT(TOKEN) yylval.m_float=std::stof(yytext);PRINT(#TOKEN);return TOKEN
 
 %}
 
@@ -32,6 +32,7 @@
  
 %x text_state
 
+FLOAT_VAL     \-?[1-9][0-9]*\.[0-9]*f?
 INT_VAL       \-?[1-9][0-9]*|0
 SPACE         [ \t]*
 NEW_LINE      [\n\r]
@@ -60,11 +61,14 @@ EQUAL         \=
 %%
 
 int                       {RETURN(INT_TYPE);}
+float                     {RETURN(FLOAT_TYPE);} 
 void                      {RETURN(VOID_TYPE);}
+string                    {RETURN(STRING_TYPE);}
 return                    {RETURN(RETURN);}
 def                       {RETURN(DEF);}
 true|false                {RETURN(BOOL_VAL);}
 {SYMBOL}                  {RETURN(SYMBOL);}
+{FLOAT_VAL}               {RETURN_FLOAT(FLOAT_VAL);}
 {INT_VAL}                 {RETURN_INT(INT_VAL);}
 
 \"                        {yy_push_state(text_state);}

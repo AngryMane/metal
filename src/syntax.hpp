@@ -111,9 +111,10 @@ union YYSTYPE
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
   FloatLiteralAST* m_FloatLiteralAST;
+  VarRefAST* m_VarRefAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 
-#line 117 "src/syntax.hpp" /* yacc.c:1909  */
+#line 118 "src/syntax.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

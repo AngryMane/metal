@@ -51,6 +51,7 @@ yyFlexLexer* lexer;
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
   FloatLiteralAST* m_FloatLiteralAST;
+  VarRefAST* m_VarRefAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 }
 
@@ -98,13 +99,13 @@ yyFlexLexer* lexer;
 %type <m_ExpressionAST> expression 
 %type <m_IntLiteralAST> int_literal 
 %type <m_FloatLiteralAST> float_literal 
+%type <m_VarRefAST> var_ref  
 
 // function decl
 %type <m_FunctionAST> function_decl function_header 
 
 // statement
 %type <m_BaseAST> statement var_decl return external_decl
-
 %type <m_BaseASTContainer> var_decls statements function_body 
 
 // priority and associativity of operator
@@ -177,9 +178,12 @@ expression : expression PLUS expression {auto* bi = new BinaryOperatorAST($2, $1
            | PARENTHESE_S expression MINUS expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
            | PARENTHESE_S expression ASTER expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
            | PARENTHESE_S expression SLASH expression PARENTHESE_E {auto* bi = new BinaryOperatorAST($3, $2, $4);$$ = new ExpressionAST(bi);}
+           | var_ref {$$ = new ExpressionAST($1);}
            | int_literal {$$ = new ExpressionAST($1);}
            | float_literal {$$ = new ExpressionAST($1);}
            ;
+
+var_ref : SYMBOL {$$ = new VarRefAST("");}
              
 int_literal : INT_VAL {$$ = new IntLiteralAST($1);}
               ;
@@ -212,7 +216,7 @@ int yylex(void){
 
 int main(){
   std::filebuf file;
-  bool is_open = file.open("./result/target.cpp", std::ios::in);
+  bool is_open = file.open("./target.cpp", std::ios::in);
   if (is_open == false){
     std::cout << "Open target file failed" << std::endl;
     return 1;

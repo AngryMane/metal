@@ -1,9 +1,9 @@
 CC := g++
-CFLANGS := -g -std=c++11 -oresult/lexer.a -Irules/
+CFLANGS := -g -std=c++11 -olexer.a -Irules/ -Iinc/
 FLEX := flex++
 BISON := bison
 
-AST_DIR = AST
+AST_DIR = inc
 RULE_DIR = rules
 SRC_DIR := src
 
@@ -18,17 +18,13 @@ BISON_FLAGS = -d -o$(SRC_DIR)/syntax.cpp
 
 all: generate compile
 
-generate: flex bison move
+generate: flex bison
 
 flex:	
 	$(FLEX) $(FLEX_FLAGS) $(FLEX_INPUTS) 
 
 bison:
 	$(BISON) $(BISON_FLAGS) $(BISON_INPUTS) 
-
-move:
-	cp $(AST_DIR)/*.h $(SRC_DIR)
-	cp $(AST_DIR)/*.cpp $(SRC_DIR)
 
 compile:
 	$(CC) $(CFLANGS) $(SRC_DIR)/token.cpp $(SRC_DIR)/syntax.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core`

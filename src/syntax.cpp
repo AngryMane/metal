@@ -184,9 +184,10 @@ union YYSTYPE
   ExpressionAST* m_ExpressionAST;
   IntLiteralAST* m_IntLiteralAST;
   FloatLiteralAST* m_FloatLiteralAST;
+  VarRefAST* m_VarRefAST;
   std::vector<BaseAST*>* m_BaseASTContainer;
 
-#line 190 "src/syntax.cpp" /* yacc.c:355  */
+#line 191 "src/syntax.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -203,7 +204,7 @@ int yyparse (ParseContext& parse_context, BaseAST** ret);
 
 /* Copy the second part of user declarations.  */
 
-#line 207 "src/syntax.cpp" /* yacc.c:358  */
+#line 208 "src/syntax.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -443,18 +444,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  24
+#define YYFINAL  26
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   84
+#define YYLAST   86
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  30
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  15
+#define YYNNTS  16
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  36
+#define YYNRULES  38
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  67
+#define YYNSTATES  69
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -503,10 +504,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   119,   119,   120,   123,   124,   130,   133,   134,   137,
-     143,   144,   145,   146,   152,   153,   156,   157,   158,   161,
-     162,   165,   166,   172,   173,   174,   175,   176,   177,   178,
-     179,   180,   181,   184,   187,   193,   194
+       0,   120,   120,   121,   124,   125,   131,   134,   135,   138,
+     144,   145,   146,   147,   153,   154,   157,   158,   159,   162,
+     163,   166,   167,   173,   174,   175,   176,   177,   178,   179,
+     180,   181,   182,   183,   186,   188,   191,   197,   198
 };
 #endif
 
@@ -522,7 +523,8 @@ static const char *const yytname[] =
   "RETURN", "INT_TYPE", "FLOAT_TYPE", "VOID_TYPE", "STRING_TYPE",
   "$accept", "root", "external_decl", "function_decl", "function_header",
   "function_body", "primary_type", "statements", "statement", "var_decl",
-  "return", "expression", "int_literal", "float_literal", "var_decls", YY_NULLPTR
+  "return", "expression", "var_ref", "int_literal", "float_literal",
+  "var_decls", YY_NULLPTR
 };
 #endif
 
@@ -537,10 +539,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -44
+#define YYPACT_NINF -47
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-44)))
+  (!!((Yystate) == (-47)))
 
 #define YYTABLE_NINF -1
 
@@ -551,13 +553,13 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,   -44,   -44,     7,    38,    38,   -44,   -44,   -44,   -44,
-      16,    -3,   -44,     9,    44,   -44,    15,    23,    46,   -44,
-     -44,    40,    50,    54,   -44,   -44,    31,   -44,    28,   -44,
-     -44,   -44,    38,    38,    38,    38,   -14,    38,    38,    38,
-      38,    39,    31,    38,   -12,   -12,   -44,   -44,    48,    63,
-      33,    22,    24,    29,    55,   -44,   -44,    54,   -44,    48,
-      48,   -44,   -44,   -44,   -44,   -44,   -44
+      -1,   -47,   -47,   -47,     4,    42,    42,   -47,   -47,   -47,
+     -47,    15,    -1,   -47,     6,    20,   -47,    39,    40,    50,
+     -47,   -47,   -47,    28,    54,    58,   -47,   -47,    35,   -47,
+      26,   -47,   -47,   -47,    42,    42,    42,    42,    24,    42,
+      42,    42,    42,    43,    35,    42,     2,     2,   -47,   -47,
+      52,    44,    33,   -10,    -7,    59,    60,   -47,   -47,    58,
+     -47,    52,    52,   -47,   -47,   -47,   -47,   -47,   -47
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -565,27 +567,27 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,    33,    34,     0,     0,    22,    10,    12,    11,    13,
-       0,     2,     4,     0,     0,     5,     0,     0,     0,    31,
-      32,     0,     0,    21,     1,     3,    14,     6,    19,    16,
-      17,    18,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    14,     0,    23,    24,    25,    26,     0,    35,
-       0,    23,    24,    25,    26,     9,    15,    20,     7,     0,
-       0,    27,    28,    29,    30,    36,     8
+       2,    34,    35,    36,     0,     0,    22,    10,    12,    11,
+      13,     0,     2,     4,     0,     0,     5,     0,     0,     0,
+      31,    32,    33,     0,     0,    21,     1,     3,    14,     6,
+      19,    16,    17,    18,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    14,     0,    23,    24,    25,    26,
+       0,    37,     0,    23,    24,    25,    26,     9,    15,    20,
+       7,     0,     0,    27,    28,    29,    30,    38,     8
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -44,    69,   -44,   -44,   -44,   -44,   -43,    41,   -24,   -27,
-     -44,    -4,   -44,   -44,    25
+     -47,    45,   -47,   -47,   -47,   -47,   -46,    38,   -25,   -28,
+     -47,    -5,   -47,   -47,   -47,    25
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,    10,    11,    12,    13,    27,    14,    41,    15,    16,
-      17,    18,    19,    20,    50
+      -1,    11,    12,    13,    14,    29,    15,    43,    16,    17,
+      18,    19,    20,    21,    22,    52
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -593,41 +595,41 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      22,    23,    42,     1,     2,    58,    34,    35,    48,    49,
-      21,     3,     6,     7,     8,     9,    24,    66,    42,    29,
-       4,    26,     5,     6,     7,     8,     9,    30,    44,    45,
-      46,    47,    49,    51,    52,    53,    54,     1,     2,    57,
-      34,    35,    34,    35,     1,     2,    61,    28,    62,    43,
-      31,    36,    55,    63,     4,    60,     5,     6,     7,     8,
-       9,     4,    32,    33,    34,    35,    37,    38,    39,    40,
-      32,    33,    34,    35,     6,     7,     8,     9,    59,    64,
-      25,     0,     0,    56,    65
+      24,    25,     1,    44,    60,     2,     3,    23,    36,    37,
+      51,    36,    37,     4,    63,    26,    68,    64,    28,    44,
+      36,    37,     5,    30,     6,     7,     8,     9,    10,    46,
+      47,    48,    49,    51,    53,    54,    55,    56,     1,    38,
+      59,     2,     3,    31,    32,     1,    50,    45,     2,     3,
+       7,     8,     9,    10,    33,    62,    57,    27,     5,    61,
+       6,     7,     8,     9,    10,     5,    34,    35,    36,    37,
+      39,    40,    41,    42,    34,    35,    36,    37,     7,     8,
+       9,    10,    58,    65,    66,     0,    67
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,     5,    26,     6,     7,    48,    18,    19,    22,    36,
-       3,    14,    26,    27,    28,    29,     0,    60,    42,     4,
-      23,    12,    25,    26,    27,    28,    29,     4,    32,    33,
-      34,    35,    59,    37,    38,    39,    40,     6,     7,    43,
-      18,    19,    18,    19,     6,     7,    24,     3,    24,    21,
-       4,    11,    13,    24,    23,    22,    25,    26,    27,    28,
-      29,    23,    16,    17,    18,    19,    16,    17,    18,    19,
-      16,    17,    18,    19,    26,    27,    28,    29,    15,    24,
-      11,    -1,    -1,    42,    59
+       5,     6,     3,    28,    50,     6,     7,     3,    18,    19,
+      38,    18,    19,    14,    24,     0,    62,    24,    12,    44,
+      18,    19,    23,     3,    25,    26,    27,    28,    29,    34,
+      35,    36,    37,    61,    39,    40,    41,    42,     3,    11,
+      45,     6,     7,     4,     4,     3,    22,    21,     6,     7,
+      26,    27,    28,    29,     4,    22,    13,    12,    23,    15,
+      25,    26,    27,    28,    29,    23,    16,    17,    18,    19,
+      16,    17,    18,    19,    16,    17,    18,    19,    26,    27,
+      28,    29,    44,    24,    24,    -1,    61
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     6,     7,    14,    23,    25,    26,    27,    28,    29,
-      31,    32,    33,    34,    36,    38,    39,    40,    41,    42,
-      43,     3,    41,    41,     0,    31,    12,    35,     3,     4,
-       4,     4,    16,    17,    18,    19,    11,    16,    17,    18,
-      19,    37,    38,    21,    41,    41,    41,    41,    22,    39,
-      44,    41,    41,    41,    41,    13,    37,    41,    36,    15,
-      22,    24,    24,    24,    24,    44,    36
+       0,     3,     6,     7,    14,    23,    25,    26,    27,    28,
+      29,    31,    32,    33,    34,    36,    38,    39,    40,    41,
+      42,    43,    44,     3,    41,    41,     0,    31,    12,    35,
+       3,     4,     4,     4,    16,    17,    18,    19,    11,    16,
+      17,    18,    19,    37,    38,    21,    41,    41,    41,    41,
+      22,    39,    45,    41,    41,    41,    41,    13,    37,    41,
+      36,    15,    22,    24,    24,    24,    24,    45,    36
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -636,7 +638,7 @@ static const yytype_uint8 yyr1[] =
        0,    30,    31,    31,    32,    32,    33,    34,    34,    35,
       36,    36,    36,    36,    37,    37,    38,    38,    38,    39,
       39,    40,    40,    41,    41,    41,    41,    41,    41,    41,
-      41,    41,    41,    42,    43,    44,    44
+      41,    41,    41,    41,    42,    43,    44,    45,    45
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -645,7 +647,7 @@ static const yytype_uint8 yyr2[] =
        0,     2,     0,     2,     1,     1,     2,     5,     6,     3,
        1,     1,     1,     1,     0,     2,     2,     2,     2,     2,
        4,     2,     1,     3,     3,     3,     3,     5,     5,     5,
-       5,     1,     1,     1,     1,     1,     3
+       5,     1,     1,     1,     1,     1,     1,     1,     3
 };
 
 
@@ -1326,193 +1328,205 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 119 "rules/syntax.y" /* yacc.c:1646  */
+#line 120 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_RootAST) = new RootAST();*ret = (yyval.m_RootAST);}
-#line 1332 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1334 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 120 "rules/syntax.y" /* yacc.c:1646  */
+#line 121 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_RootAST) = (yyvsp[0].m_RootAST);(yyval.m_RootAST)->AddDecl((yyvsp[-1].m_BaseAST));}
-#line 1338 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1340 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 123 "rules/syntax.y" /* yacc.c:1646  */
+#line 124 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = (yyvsp[0].m_FunctionAST);}
-#line 1344 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1346 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 124 "rules/syntax.y" /* yacc.c:1646  */
+#line 125 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = (yyvsp[0].m_BaseAST);}
-#line 1350 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1352 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 130 "rules/syntax.y" /* yacc.c:1646  */
+#line 131 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_FunctionAST) = (yyvsp[-1].m_FunctionAST);(yyval.m_FunctionAST)->SetStatements((yyvsp[0].m_BaseASTContainer));}
-#line 1356 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1358 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 133 "rules/syntax.y" /* yacc.c:1646  */
+#line 134 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_FunctionAST) = new FunctionAST((yyvsp[-3].m_string), (yyvsp[0].m_string));}
-#line 1362 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1364 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 134 "rules/syntax.y" /* yacc.c:1646  */
+#line 135 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_FunctionAST) = new FunctionAST((yyvsp[-4].m_string), (yyvsp[0].m_string), *(yyvsp[-2].m_BaseASTContainer));}
-#line 1368 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1370 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 137 "rules/syntax.y" /* yacc.c:1646  */
+#line 138 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseASTContainer) = (yyvsp[-1].m_BaseASTContainer);}
-#line 1374 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1376 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 152 "rules/syntax.y" /* yacc.c:1646  */
+#line 153 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseASTContainer) = new std::vector<BaseAST*>;}
-#line 1380 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1382 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 153 "rules/syntax.y" /* yacc.c:1646  */
+#line 154 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseASTContainer) = (yyvsp[0].m_BaseASTContainer);(yyvsp[0].m_BaseASTContainer)->push_back((yyvsp[-1].m_BaseAST));}
-#line 1386 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1388 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 156 "rules/syntax.y" /* yacc.c:1646  */
+#line 157 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = (yyvsp[-1].m_BaseAST);}
-#line 1392 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1394 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 157 "rules/syntax.y" /* yacc.c:1646  */
+#line 158 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = (yyvsp[-1].m_BaseAST);}
-#line 1398 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1400 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 158 "rules/syntax.y" /* yacc.c:1646  */
+#line 159 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = (yyvsp[-1].m_ExpressionAST);}
-#line 1404 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1406 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 161 "rules/syntax.y" /* yacc.c:1646  */
+#line 162 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[0].m_string), VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
-#line 1410 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1412 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 162 "rules/syntax.y" /* yacc.c:1646  */
+#line 163 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[-2].m_string), VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
-#line 1416 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1418 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 165 "rules/syntax.y" /* yacc.c:1646  */
+#line 166 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = new ReturnAST((yyvsp[0].m_ExpressionAST));}
-#line 1422 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1424 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 166 "rules/syntax.y" /* yacc.c:1646  */
+#line 167 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseAST) = new ReturnAST(NULL);}
-#line 1428 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1430 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 172 "rules/syntax.y" /* yacc.c:1646  */
+#line 173 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-1].m_string), (yyvsp[-2].m_ExpressionAST), (yyvsp[0].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1434 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1436 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 173 "rules/syntax.y" /* yacc.c:1646  */
+#line 174 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-1].m_string), (yyvsp[-2].m_ExpressionAST), (yyvsp[0].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1440 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1442 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 174 "rules/syntax.y" /* yacc.c:1646  */
+#line 175 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-1].m_string), (yyvsp[-2].m_ExpressionAST), (yyvsp[0].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1446 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1448 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 175 "rules/syntax.y" /* yacc.c:1646  */
+#line 176 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-1].m_string), (yyvsp[-2].m_ExpressionAST), (yyvsp[0].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1452 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1454 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 176 "rules/syntax.y" /* yacc.c:1646  */
+#line 177 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-2].m_string), (yyvsp[-3].m_ExpressionAST), (yyvsp[-1].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1458 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1460 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 177 "rules/syntax.y" /* yacc.c:1646  */
+#line 178 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-2].m_string), (yyvsp[-3].m_ExpressionAST), (yyvsp[-1].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1464 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1466 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 178 "rules/syntax.y" /* yacc.c:1646  */
+#line 179 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-2].m_string), (yyvsp[-3].m_ExpressionAST), (yyvsp[-1].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1470 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1472 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 179 "rules/syntax.y" /* yacc.c:1646  */
+#line 180 "rules/syntax.y" /* yacc.c:1646  */
     {auto* bi = new BinaryOperatorAST((yyvsp[-2].m_string), (yyvsp[-3].m_ExpressionAST), (yyvsp[-1].m_ExpressionAST));(yyval.m_ExpressionAST) = new ExpressionAST(bi);}
-#line 1476 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1478 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 180 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_ExpressionAST) = new ExpressionAST((yyvsp[0].m_IntLiteralAST));}
-#line 1482 "src/syntax.cpp" /* yacc.c:1646  */
+#line 181 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_ExpressionAST) = new ExpressionAST((yyvsp[0].m_VarRefAST));}
+#line 1484 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 181 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_ExpressionAST) = new ExpressionAST((yyvsp[0].m_FloatLiteralAST));}
-#line 1488 "src/syntax.cpp" /* yacc.c:1646  */
+#line 182 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_ExpressionAST) = new ExpressionAST((yyvsp[0].m_IntLiteralAST));}
+#line 1490 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 184 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_IntLiteralAST) = new IntLiteralAST((yyvsp[0].m_int));}
-#line 1494 "src/syntax.cpp" /* yacc.c:1646  */
+#line 183 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_ExpressionAST) = new ExpressionAST((yyvsp[0].m_FloatLiteralAST));}
+#line 1496 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 187 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_FloatLiteralAST) = new FloatLiteralAST((yyvsp[0].m_float));}
-#line 1500 "src/syntax.cpp" /* yacc.c:1646  */
+#line 186 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_VarRefAST) = new VarRefAST("");}
+#line 1502 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 193 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_BaseASTContainer) = new std::vector<BaseAST*>;(yyval.m_BaseASTContainer)->push_back((yyvsp[0].m_BaseAST));}
-#line 1506 "src/syntax.cpp" /* yacc.c:1646  */
+#line 188 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_IntLiteralAST) = new IntLiteralAST((yyvsp[0].m_int));}
+#line 1508 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 194 "rules/syntax.y" /* yacc.c:1646  */
+#line 191 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_FloatLiteralAST) = new FloatLiteralAST((yyvsp[0].m_float));}
+#line 1514 "src/syntax.cpp" /* yacc.c:1646  */
+    break;
+
+  case 37:
+#line 197 "rules/syntax.y" /* yacc.c:1646  */
+    {(yyval.m_BaseASTContainer) = new std::vector<BaseAST*>;(yyval.m_BaseASTContainer)->push_back((yyvsp[0].m_BaseAST));}
+#line 1520 "src/syntax.cpp" /* yacc.c:1646  */
+    break;
+
+  case 38:
+#line 198 "rules/syntax.y" /* yacc.c:1646  */
     {(yyval.m_BaseASTContainer) = (yyvsp[0].m_BaseASTContainer);(yyval.m_BaseASTContainer)->push_back((yyvsp[-2].m_BaseAST));}
-#line 1512 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1526 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1516 "src/syntax.cpp" /* yacc.c:1646  */
+#line 1530 "src/syntax.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1740,7 +1754,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 200 "rules/syntax.y" /* yacc.c:1906  */
+#line 204 "rules/syntax.y" /* yacc.c:1906  */
 
 
 void yyerror(ParseContext& parse_context, BaseAST** ret, const char *s){
@@ -1756,7 +1770,7 @@ int yylex(void){
 
 int main(){
   std::filebuf file;
-  bool is_open = file.open("./result/target.cpp", std::ios::in);
+  bool is_open = file.open("./target.cpp", std::ios::in);
   if (is_open == false){
     std::cout << "Open target file failed" << std::endl;
     return 1;

@@ -42,7 +42,7 @@ public: // operation
   llvm::Value*
   GenerateValue(
     ParseContext& parse_context){
-	  return NULL;
+    return parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty(), nullptr, m_Name.c_str());
   }
 
 public: // query

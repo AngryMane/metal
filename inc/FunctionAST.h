@@ -59,9 +59,14 @@ public: // operation
     parse_context.m_Builder->SetInsertPoint(entrypoint);
 
     std::reverse(m_Statements->begin(), m_Statements->end());
+
+    parse_context.m_SymbolTableManager->PlusScopeIndent(m_Name);
     for (auto cur : *m_Statements){
       cur->GenerateValue(parse_context);
     }
+    parse_context.m_SymbolTableManager->MinusScopeIndent();
+
+    return mainFunc;
   }
 
 public: // operation

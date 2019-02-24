@@ -1768,12 +1768,14 @@ int yylex(void){
   return lexer->yylex();
 }
 
-int main(){
+void
+Parse(std::string target){
+  std::cout << target << std::endl;
   std::filebuf file;
-  bool is_open = file.open("./target.cpp", std::ios::in);
+  bool is_open = file.open(target, std::ios::in);
   if (is_open == false){
     std::cout << "Open target file failed" << std::endl;
-    return 1;
+    return ;
   }
 
   std::istream ifs(&file);
@@ -1786,7 +1788,7 @@ int main(){
 
   BaseAST* ret = NULL;
   yyparse(parse_context, &ret);
-  llvm::Value* value = ret->GenerateValue(parse_context);
+  ret->GenerateValue(parse_context);
 
   std::error_code error_info;
   llvm::raw_fd_ostream raw_stream("out.ll", error_info, llvm::sys::fs::OpenFlags::F_None);
@@ -1796,6 +1798,32 @@ int main(){
 
   delete lexer;
   delete ret;
+}
+
+int main(){
+  const std::string TARGET_PATH = "./target/"; 
+
+  DIR* dir = opendir(TARGET_PATH.c_str());
+  if (dir == NULL){
+    return 0;
+  }
+
+  struct dirent* dent = NULL;
+  do {
+    dent = readdir(dir);
+    if (dent  == NULL){
+      break;
+    }
+
+    if (strcmp(dent->d_name, ".") == 0){
+      continue;
+    }
+    if (strcmp(dent->d_name, "..") == 0){
+      continue;
+    }
+
+    Parse(TARGET_PATH + dent->d_name);
+  } while(dent != NULL);
 
   return 0;
 }

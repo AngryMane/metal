@@ -42,7 +42,9 @@ public: // operation
   llvm::Value*
   GenerateValue(
     ParseContext& parse_context){
-    return parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty(), nullptr, m_Name.c_str());
+    auto var = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty(), nullptr, m_Name.c_str());
+    parse_context.m_SymbolTableManager->AddSymbol(m_Name, var);
+    return var;
   }
 
 public: // query

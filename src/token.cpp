@@ -483,7 +483,7 @@ static const flex_int32_t yy_rule_can_match_eol[34] =
 #include <stdio.h>
 #include "syntax.hpp"
 
-#define METAL_DEBUG
+//#define METAL_DEBUG
 
 #ifdef METAL_DEBUG
 #define PRINT(s) printf(s);printf(" ");

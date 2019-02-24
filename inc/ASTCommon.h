@@ -1,6 +1,8 @@
 #ifndef ASTCOMMON_H
 #define ASTCOMMON_H
 
+#include "SymbolTableManager.h"
+
 // AST type
 enum AST_TYPE{
   AST_TYPE_BASE, // base ast
@@ -25,11 +27,20 @@ struct ParseContext{
         llvm::IRBuilder<>* builder)
 	     : m_Context(context)
 	     , m_Module(module)
-	     , m_Builder(builder){
+	     , m_Builder(builder)
+       , m_SymbolTableManager(NULL){
+         m_SymbolTableManager = new SymbolTableManager();
 	 }
-    llvm::LLVMContext* m_Context;
-    llvm::Module* m_Module;
-    llvm::IRBuilder<>* m_Builder;
+
+  ~ParseContext(){
+    delete m_SymbolTableManager;
+    m_SymbolTableManager = NULL;
+  }
+
+  llvm::LLVMContext* m_Context;
+  llvm::Module* m_Module;
+  llvm::IRBuilder<>* m_Builder;
+  SymbolTableManager* m_SymbolTableManager;
 };
 
 #endif

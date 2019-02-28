@@ -1407,13 +1407,13 @@ yyreduce:
 
   case 19:
 #line 162 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[0].m_string), VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
+    {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[0].m_string), 0, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
 #line 1412 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
 #line 163 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[-2].m_string), VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
+    {(yyval.m_BaseAST) = new VarDeclAST((yyvsp[-2].m_string), (yyvsp[0].m_ExpressionAST), VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
 #line 1418 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 

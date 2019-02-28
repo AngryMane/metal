@@ -159,8 +159,8 @@ statement : var_decl SEMICOLON   {$$ = $1;}
           | expression SEMICOLON {$$ = $1;}
             ;
 
-var_decl  : primary_type SYMBOL                         {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
-          | primary_type SYMBOL VAR_INIT_DEF expression {$$ = new VarDeclAST($2, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
+var_decl  : primary_type SYMBOL                         {$$ = new VarDeclAST($2, 0, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
+          | primary_type SYMBOL VAR_INIT_DEF expression {$$ = new VarDeclAST($2, $4, VarDeclAST::VAR_TYPE::VAR_TYPE_LOCAL);}
           ;
 
 return  : RETURN expression {$$ = new ReturnAST($2);}

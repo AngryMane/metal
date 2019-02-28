@@ -23,11 +23,25 @@ public: // initialize/filnalize
   // constructor
   VarDeclAST(
     std::string name,
+    int val,
     VAR_TYPE type)
     : BaseAST(AST_TYPE_VAR_DECL)
     , m_Name(name)
-    , m_Value(0)
+    , m_Value(val)
+    , m_ExpressionValue(NULL)
     , m_VarType(type){
+  }
+
+  // constructor
+  VarDeclAST(
+      std::string name,
+      BaseAST* val,
+      VAR_TYPE type)
+      : BaseAST(AST_TYPE_VAR_DECL)
+      , m_Name(name)
+      , m_Value(0)
+      , m_ExpressionValue(val)
+      , m_VarType(type){
   }
 
   // destructor
@@ -43,6 +57,10 @@ public: // operation
   GenerateValue(
     ParseContext& parse_context){
     auto var = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty(), nullptr, m_Name.c_str());
+
+    //auto exp = m_ExpressionValue->GenerateValue(parse_context);
+    std::cout << m_ExpressionValue << std::endl;
+    //parse_context.m_Builder->CreateStore(exp, var);
     parse_context.m_SymbolTableManager->AddSymbol(m_Name, var);
     return var;
   }
@@ -58,6 +76,9 @@ private: // private member vars
 
   // var value
   MEMBER_WITH_GET_SET(int, Value)
+
+  // var value(expression)
+  MEMBER_WITH_GET_SET(BaseAST*, ExpressionValue)
 
   // var type
   MEMBER_WITH_GET(VAR_TYPE, VarType)

@@ -28,7 +28,8 @@ public: // operation
   llvm::Value*
   GenerateValue(
     ParseContext& parse_context){
-	  return NULL;
+    auto* ret = parse_context.m_SymbolTableManager->Search(m_Name);
+    return ret;
   }
 
 public: // query

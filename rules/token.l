@@ -22,7 +22,7 @@
 #define PRINT(s)
 #endif
 
-#define RETURN(TOKEN) memcpy(yylval.m_string,yytext, std::min(yyleng, 128));PRINT(#TOKEN);return TOKEN
+#define RETURN(TOKEN) memset(yytext,0,128);memcpy(yylval.m_string,yytext,std::min(yyleng, 128));PRINT(#TOKEN);return TOKEN
 #define RETURN_INT(TOKEN) yylval.m_int=std::stoi(yytext);PRINT(#TOKEN);return TOKEN
 #define RETURN_FLOAT(TOKEN) yylval.m_float=std::stof(yytext);PRINT(#TOKEN);return TOKEN
 

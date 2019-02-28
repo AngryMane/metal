@@ -74,11 +74,12 @@ public: // operation
 			 (OPERATOR_TYPE_HAT == m_OperatorType) ? (hat) :
 			 (0);
 
-    llvm::Value* result = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty());
-    auto* keisan = generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
-    auto* ret = parse_context.m_Builder->CreateStore(keisan, result);
+    //llvm::Value* result = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty());
+    //auto* keisan = generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
+    //auto* ret = parse_context.m_Builder->CreateStore(keisan, result);
 
-    return parse_context.m_Builder->CreateLoad(result);
+    //return parse_context.m_Builder->CreateLoad(result);
+    return generator(m_LeftOperand->GenerateValue(parse_context), m_RightOperand->GenerateValue(parse_context));
   }
 
 public: // operation

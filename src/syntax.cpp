@@ -1497,7 +1497,7 @@ yyreduce:
 
   case 34:
 #line 186 "rules/syntax.y" /* yacc.c:1646  */
-    {(yyval.m_VarRefAST) = new VarRefAST("");}
+    {(yyval.m_VarRefAST) = new VarRefAST((yyvsp[0].m_string));}
 #line 1502 "src/syntax.cpp" /* yacc.c:1646  */
     break;
 

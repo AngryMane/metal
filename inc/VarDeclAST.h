@@ -58,9 +58,8 @@ public: // operation
     ParseContext& parse_context){
     auto var = parse_context.m_Builder->CreateAlloca(parse_context.m_Builder->getInt64Ty(), nullptr, m_Name.c_str());
 
-    //auto exp = m_ExpressionValue->GenerateValue(parse_context);
-    std::cout << m_ExpressionValue << std::endl;
-    //parse_context.m_Builder->CreateStore(exp, var);
+    auto exp = m_ExpressionValue->GenerateValue(parse_context);
+    parse_context.m_Builder->CreateStore(exp, var);
     parse_context.m_SymbolTableManager->AddSymbol(m_Name, var);
     return var;
   }

@@ -183,7 +183,7 @@ expression : expression PLUS expression {auto* bi = new BinaryOperatorAST($2, $1
            | float_literal {$$ = new ExpressionAST($1);}
            ;
 
-var_ref : SYMBOL {$$ = new VarRefAST("");}
+var_ref : SYMBOL {$$ = new VarRefAST($1);}
              
 int_literal : INT_VAL {$$ = new IntLiteralAST($1);}
               ;
